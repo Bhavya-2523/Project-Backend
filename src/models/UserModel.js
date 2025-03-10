@@ -2,11 +2,11 @@ const mongoose = require ("mongoose")
 const Schema = mongoose.Schema
 
 const userSchema = new Schema({
-   firstName: {
+   userName: {
       type: String,
       required: true
    },
-   lastName: {
+   fullName: {
       type: String,
       required: true
    },
@@ -15,15 +15,27 @@ const userSchema = new Schema({
       required: true,
       unique: true
    },
+   phone:{
+      type:Number,
+      required:true,
+   },
    password: {
       type: String,
       required: true
    },
-   role: {
+   confirmPassword: {
       type: String,
-      enum: ["admin", "respondent", "creator"], // Restrict role values
       required: true
+   },
+   roleId:{
+      type:Schema.Types.ObjectId,
+      ref:"roles"
    }
+   // role: {
+   //    type: String,
+   //    enum: ["admin", "respondent", "creator"], // Restrict role values
+   //    required: true
+   // }
 }, { timestamps: true }); // Adds `createdAt` & `updatedAt` automatically
 
 module.exports = mongoose.model("users",userSchema)
