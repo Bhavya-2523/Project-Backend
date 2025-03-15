@@ -1,12 +1,43 @@
 const surveyModel = require("../models/SurveyModel");
+const multer = require("multer");
+const path = require("path");
+const cloudinaryUtil = require("../utils/CloudinaryUtil");
 
-const getAllSurveys = async (req, res) => {
+const storage = multer.diskStorage({
+    destination: "./uploads",
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+      },
+})
+const upload = multer({
+    storage: storage,
+    //fileFilter:
+  }).single("image");
+
+
+const getAllSurveys = async (req, res) => {8
     try {
         const surveys = await surveyModel.find().populate("creatorId").populate("categoryId");
         res.json({
             message: "Surveys fetched successfully",
             data: surveys
         });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching surveys", error: error.message });
+    }
+};
+const getAllSurveysByUserId = async (req, res) => {
+    try {
+        const surveys = await surveyModel.find({creatorId:req.params.creatorId}).populate("creatorId").populate("categoryId");
+        if (surveys.length === 0) {
+            res.status(404).json({ message: "No surveys found" });
+        }else{
+        res.status(200).json({
+            message: "Surveys fetched successfully",
+            data: surveys
+        });
+}
+
     } catch (error) {
         res.status(500).json({ message: "Error fetching surveys", error: error.message });
     }
@@ -39,24 +70,67 @@ const deleteSurvey = async (req, res) => {
     }
 };
 
-const getSurveyById = async (req, res) => {
+// const getSurveyById = async (req, res) => {
+//     try {
+//         const foundSurvey = await surveyModel.findById(req.params.id).populate("creatorId").populate("categoryId");
+//         if (!foundSurvey) {
+//             return res.status(404).json({ message: "Survey not found" });
+//         }
+//         res.json({
+//             message: "Survey fetched successfully",
+//             data: foundSurvey
+//         });
+//     } catch (error) {
+//         res.status(500).json({ message: "Error fetching survey", error: error.message });
+//     }
+// };
+
+const getSurveyById= async(req,res)=>{
     try {
-        const foundSurvey = await surveyModel.findById(req.params.id).populate("creatorId").populate("categoryId");
-        if (!foundSurvey) {
-            return res.status(404).json({ message: "Survey not found" });
-        }
-        res.json({
-            message: "Survey fetched successfully",
-            data: foundSurvey
+      const survey = await surveyModel.findById(req.params.Id);
+      if (!survey) {
+        res.status(404).json({ message: "No hording found" });
+      } else {
+        res.status(200).json({
+          message: "Hording found successfully",
+          data: survey,
         });
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching survey", error: error.message });
+        
+      }
+    } catch (err) {
+      res.status(500).json({ message: err.message });
     }
-};
+  }
+ 
+const addSurveyWithFile = async (req,res)=>{
+    upload(req,res,async(err)=>{
+        if(err){
+            res.status(500).json({
+                message:err.message,
+            })
+        }else{
+            const cloudinaryResponse = await cloudinaryUtil.uploadFileToCloudinary(req.file);
+            console.log(cloudinaryResponse);
+            console.log(req.body);
+
+            req.body.imageURL = cloudinaryResponse.secure_url
+            const savedSurvey = await surveyModel.create(req.body);
+             
+            res.status(200).json({
+                message:"Survey saved succesfully",
+                data: savedSurvey
+            })
+        
+        }
+    })
+}
+
 
 module.exports = {
     getAllSurveys,
     addSurvey,
     deleteSurvey,
-    getSurveyById
+    getSurveyById,
+    addSurveyWithFile,
+    getAllSurveysByUserId
 };

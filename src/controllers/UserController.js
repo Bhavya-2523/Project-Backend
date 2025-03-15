@@ -1,6 +1,6 @@
 const userModel = require("../models/UserModel")
 const bcrypt = require("bcrypt")
-
+const mailUtil = require("../utils/MailUtil")
 //---------------------------------------------------
 
 const loginUser = async (req, res) => {
@@ -72,6 +72,10 @@ const signup = async (req,res)=>{
         const hashedPassword = bcrypt.hashSync(req.body.password,salt);
         req.body.password = hashedPassword;
         const createdUser = await userModel.create(req.body);
+
+        await mailUtil.sendingMail(createdUser.email,"Welcome to SurveySnap","Welcome to survey snap family")
+        
+        
         res.status(201).json({
             message: "user created..",
             data: createdUser,
