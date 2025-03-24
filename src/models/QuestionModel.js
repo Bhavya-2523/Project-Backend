@@ -4,30 +4,61 @@ const Schema = mongoose.Schema;
 const questionSchema = new Schema({
     surveyId: {
         type: Schema.Types.ObjectId,
-        ref: "surveys", // ✅ Links the question to a specific survey
+        ref: "surveys",
         required: true
     },
     questionText: {
         type: String,
-        required: true // ✅ Every question must have text
+        maxlength: 300,
+        required: true
     },
     questionType: {
         type: String,
-        enum: ["text", "multiple-choice", "checkbox", "rating", "dropdown"],
+        enum: ["Multiple Choice", "Short Answer", "Checkbox", "Rating Scale", "Yes/No", "Dropdown"],
         required: true
     },
     options: {
-        type: [String], // ✅ Only needed for multiple-choice, checkbox, dropdown
-        required: function() {
-            return ["multiple-choice", "checkbox", "dropdown"].includes(this.questionType);
+        type: [String],
+        validate: {
+            validator: function (arr) {
+                return (
+                    !["Multiple Choice", "Dropdown", "Checkbox"].includes(this.questionType) || 
+                    (Array.isArray(arr) && arr.length <= 10 && arr.every(opt => opt.length <= 100))
+                );
+            },
+            message: "Options are required for MCQ, Checkbox, and Dropdown (max 10 items, 100 chars each)."
         }
     },
     required: {
         type: Boolean,
-        default: false // ✅ Default: Question is not mandatory
+        default: false
+    },
+    questionOrder: {
+        type: Number,
+        required: true
+    },
+    scaleMin: {
+        type: Number,
+        min: 1,
+        max: 10,
+        required: function () {
+            return this.questionType === "Rating Scale";
+        }
+    },
+    scaleMax: {
+        type: Number,
+        min: 1,
+        max: 10,
+        required: function () {
+            return this.questionType === "Rating Scale";
+        }
+    },
+    validationRules: {
+        type: Schema.Types.Mixed,
+        default: null
     }
 }, {
-    timestamps: true // ✅ Auto-adds `createdAt` & `updatedAt`
+    timestamps: true
 });
 
 module.exports = mongoose.model("questions", questionSchema);

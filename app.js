@@ -19,6 +19,9 @@ app.use("/category",categoryRoutes)
 const surveyRoutes = require ("./src/routes/SurveyRoutes")
 app.use("/survey",surveyRoutes)
 
+const questionRoutes = require ("./src/routes/QuestionRoutes")
+app.use("/question",questionRoutes)
+
 mongoose.connect("mongodb://127.0.0.1:27017/25_node_internship").then(()=>{
     console.log("database connected....")
 })

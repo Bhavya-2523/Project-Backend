@@ -12,7 +12,8 @@ const sendingMail = async(to,subject,text) =>{
         from:"surveysnapofficial@gmail.com",
         to: to,
         subject: subject,
-        text: text
+        // text: text
+        html:text
     }
     const mailresponse = await transporter.sendMail(mailOptions);
     console.log(mailresponse);

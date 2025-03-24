@@ -85,22 +85,18 @@ const deleteSurvey = async (req, res) => {
 //     }
 // };
 
-const getSurveyById= async(req,res)=>{
+const getSurveyById = async (req, res) => {
     try {
-      const survey = await surveyModel.findById(req.params.Id);
-      if (!survey) {
-        res.status(404).json({ message: "No hording found" });
-      } else {
-        res.status(200).json({
-          message: "Hording found successfully",
-          data: survey,
-        });
-        
-      }
+        const survey = await surveyModel.findById(req.params.id);
+        if (!survey) {
+            return res.status(404).json({ message: "Survey not found" });
+        }
+        res.status(200).json({ data: survey });
     } catch (err) {
-      res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Error fetching survey", error: err });
     }
-  }
+};
+
  
 const addSurveyWithFile = async (req,res)=>{
     upload(req,res,async(err)=>{
@@ -123,8 +119,36 @@ const addSurveyWithFile = async (req,res)=>{
         
         }
     })
-}
+};
 
+const updateSurvey = async (req, res) => {
+    try {
+      const updatedSurvey = await surveyModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+  
+      if (!updatedSurvey) {
+        return res.status(404).json({
+          message: "Survey not found",
+        });
+      }
+  
+      res.status(200).json({
+        message: "Survey updated successfully",
+        data: updatedSurvey,
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: "Error while updating survey",
+        error: err.message,
+      });
+    }
+  };
+  
+
+  
 
 module.exports = {
     getAllSurveys,
@@ -132,5 +156,6 @@ module.exports = {
     deleteSurvey,
     getSurveyById,
     addSurveyWithFile,
-    getAllSurveysByUserId
+    getAllSurveysByUserId,
+    updateSurvey
 };
