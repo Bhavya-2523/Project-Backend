@@ -1,5 +1,5 @@
-const Response = require("../models/Response");
-const Survey = require("../models/Survey");
+const Response = require("../models/ResponseModel");
+const Survey = require("../models/SurveyModel");
 
 const submitResponse = async (req, res) => {
     try {

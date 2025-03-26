@@ -22,6 +22,12 @@ app.use("/survey",surveyRoutes)
 const questionRoutes = require ("./src/routes/QuestionRoutes")
 app.use("/question",questionRoutes)
 
+const responseRoutes = require ("./src/routes/ResponseRoutes")
+app.use("/response",responseRoutes)
+
+const answerRoutes = require ("./src/routes/AnswerRoutes")
+app.use("/answer",answerRoutes)
+
 mongoose.connect("mongodb://127.0.0.1:27017/25_node_internship").then(()=>{
     console.log("database connected....")
 })

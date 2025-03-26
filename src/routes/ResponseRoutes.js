@@ -1,10 +1,10 @@
 const express = require("express");
-const router = express.Router();
 const responseController = require("../controllers/ResponseController");
+const routes = require ("express").Router()
 
-router.post("/", responseController.submitResponse);
-router.get("/:surveyId", responseController.getResponsesBySurvey);
-router.get("/details/:responseId", responseController.getResponseById);
-router.delete("/:responseId", responseController.deleteResponse);
+routes.post("/", responseController.submitResponse);
+routes.get("/:surveyId", responseController.getResponsesBySurvey);
+routes.get("/details/:responseId", responseController.getResponseById);
+routes.delete("/:responseId", responseController.deleteResponse);
 
-module.exports = router;
+module.exports = routes;
