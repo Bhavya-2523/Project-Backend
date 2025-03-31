@@ -5,10 +5,10 @@ const submitAnswer = async (req, res) => {
     try {
         const { responseId, questionId, answerText, selectedOption, ratingValue } = req.body;
 
-        const response = await Response.findById(responseId);
-        if (!response) {
-            return res.status(404).json({ message: "Response not found" });
-        }
+        // const response = await Response.findById(responseId);
+        // if (!response) {
+        //     return res.status(404).json({ message: "Response not found" });
+        // }
 
         const newAnswer = new Answer({
             responseId,

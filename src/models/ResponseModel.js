@@ -5,7 +5,7 @@ const responseSchema = new Schema({
     surveyId: {
         type: Schema.Types.ObjectId,
         ref: "surveys", // Links response to a survey
-        required: true
+        // required: true
     },
     respondentId: {
         type: Schema.Types.ObjectId,
@@ -19,7 +19,7 @@ const responseSchema = new Schema({
     completionTime: {
         type: Number,
         min: 0.0,
-        required: true
+        // required: true
     },
     sessionId: {
         type: String, 

@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const answerSchema = new Schema({
-    responseId: {
-        type: Schema.Types.ObjectId,
-        ref: "responses",
-        required: true
-    },
+    // responseId: {
+    //     type: Schema.Types.ObjectId,
+    //     ref: "responses",
+    //     // required: true
+    // },
     questionId: {
         type: Schema.Types.ObjectId,
         ref: "questions", 
