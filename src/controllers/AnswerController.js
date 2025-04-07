@@ -1,5 +1,5 @@
 const Answer = require("../models/AnswerModel");
-const Response = require("../models/ResponseModel");
+// const Response = require("../models/ResponseModel");
 
 const submitAnswer = async (req, res) => {
     try {
@@ -56,8 +56,28 @@ const deleteAnswer = async (req, res) => {
     }
 };
 
+const getAnswersBySurvey = async (req, res) => {
+    try {
+        const { surveyId } = req.params;
+
+        const answers = await Answer.find({ surveyId })
+            .populate("questionId", "questionText");
+
+        if (!answers.length) {
+            return res.status(404).json({ message: "No answers found for this survey" });
+        }
+
+        res.status(200).json({ answers });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+
 module.exports = {
     submitAnswer,
     getAnswersByResponse,
-    deleteAnswer
+    deleteAnswer,
+    getAnswersBySurvey,
 };

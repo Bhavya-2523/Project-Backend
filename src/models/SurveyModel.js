@@ -18,16 +18,11 @@ const surveySchema = new Schema({
     },
     imageURL:{
         type: String,
-        // required: true
     },
     description: {
         type: String,
         required: true
     },
-    // expiryDate: {
-    //     type: Date,
-    //     required: false, // ✅ Optional, if some surveys should not expire
-    // },
     surveyStatus: {
         type: String,
         enum: ["draft", "published", "closed"], 

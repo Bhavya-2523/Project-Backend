@@ -1,214 +1,192 @@
-const userModel = require("../models/UserModel")
-const bcrypt = require("bcrypt")
-const mailUtil = require("../utils/MailUtil")
+const userModel = require("../models/UserModel");
+const bcrypt = require("bcrypt");
+const mailUtil = require("../utils/MailUtil");
 const jwt = require("jsonwebtoken");
-const secret = "secret"
+const secret = "secret";
+
 //---------------------------------------------------
 
 const loginUser = async (req, res) => {
-   
-    const email = req.body.email;
-    const password = req.body.password;
+    const { email, password } = req.body;
     
-    //const foundUserFromEmail = userModel.findOne({email:req.body.email})
-    const foundUserFromEmail = await userModel.findOne({ email: email }).populate("roleId");
-    console.log(foundUserFromEmail);
-    
-    if (foundUserFromEmail != null) {
-      //password
-      //normal -plain req.bodyy --- databse -->match  --> true | false
-      //const isMatch = bcrypt.compareSync(req.body.password,foundUserFromEmail.password)
-      const isMatch = bcrypt.compareSync( password , foundUserFromEmail.password);
-      //true | false
-        if (isMatch == true) {
+    const foundUserFromEmail = await userModel.findOne({ email }).populate("roleId");
+
+    if (foundUserFromEmail) {
+        const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
+
+        if (isMatch) {
             res.status(200).json({
-            message: "login success",
-            data: foundUserFromEmail,
+                message: "Login successful",
+                data: foundUserFromEmail,
             });
         } else {
-            res.status(400).json({
-            message: "please enter a valid password",
-            });
+            res.status(400).json({ message: "Invalid password" });
         }
-        }
-    else {
-        res.status(404).json({
-        message: "Email not found..",
-      });
+    } else {
+        res.status(404).json({ message: "Email not found" });
     }
-  };
+};
 
-  
 //---------------------------------------------------
 
-const getAllUsers = async (req,res) =>{
-    const users = await userModel.find().populate("roleId")
-    
+const loginuserWithToken = async (req, res) => {
+    const { email, password } = req.body;
+  
+    const foundUserFromEmail = await userModel.findOne({ email });
+    if (foundUserFromEmail) {
+        const isMatch = bcrypt.compareSync(password, foundUserFromEmail.password);
+        if (isMatch) {
+            const token = jwt.sign({ id: foundUserFromEmail._id }, secret);
+            res.status(200).json({ message: "User logged in", token });
+        } else {
+            res.status(400).json({ message: "Invalid credentials" });
+        }
+    } else {
+        res.status(404).json({ message: "User not found" });
+    }
+};
+
+//---------------------------------------------------
+
+const getAllUsers = async (req, res) => {
+    const users = await userModel.find().populate("roleId");
     res.json({
-        message:"Users fetched successfully",
-        data: users
-    })
-}
+        message: "Users fetched successfully",
+        data: users,
+    });
+};
 
-// const getAllUsers1 = async (req,res)=>{
-//     try{
-//         const users = await userModel.find().populate("roleId")
-//         res.status(200).json({
-//             message:"Users fetched successfully",
-//             data:users
-//         })
-//     }catch(err){
-//         res.status(500).json({
-//         message:"error",
-//         data:err
-//         })
+//---------------------------------------------------
 
-//     }
-// }
-//-------------------------------------------------
-
-const signup = async (req,res)=>{
-    try{
-        //password encrypt..
+const signup = async (req, res) => {
+    try {
+        const { password, email, phone, ...rest } = req.body;
+        
+        // Hash password
         const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(req.body.password,salt);
-        req.body.password = hashedPassword;
-        const createdUser = await userModel.create(req.body);
-
-        await mailUtil.sendingMail(createdUser.email,"Welcome to SurveySnap","Welcome to survey snap family")
+        const hashedPassword = bcrypt.hashSync(password, salt);
         
-        
-        res.status(201).json({
-            message: "user created..",
-            data: createdUser,
-        })
-    }
-    catch(err){
-        console.log(err)
-        res.status(500).json({
-            message: "error",
-            data: err,
-        })
-    }
-}
-
-//-------------------------------------------------------
-
-const addUser = async (req,res)=>{
-    const savedUser = await userModel.create(req.body)
-    res.json({
-        message:"User created...",
-        data:savedUser
-    })
-}
-
-// const addUser1 = async (req,res)=>{
-//     try{
-//         const createdUser = await userModel.create(req.body)
-//         res.status(201).json({
-//             message:"user created..",
-//             data:createdUser
-//         })
-//     }
-//     catch(err){
-//         res.status(500).json({
-//         message:"error",
-//         data:err
-//         })
-
-//     }
-// }
-
-const deleteUser = async (req,res)=>{
-    const deletedUser =await userModel.findByIdAndDelete(req.params.id)
-    res.json({
-        message:"User deleted successfully",
-        data:deletedUser
-    })
-}
-
-// const deleteUser1 = async (req,res)=>{
-//     try{
-//         const deletedUser = await userModel.findByIdAndDelete(req.params.id)
-//         res.status(204).json({
-//             message:"User deleted successfully",
-//             data:deletedUser
-//         })
-//     }catch(err){
-
-//         res.status(500).json({
-//             message:"error",
-//             data:err
-//         })
-
-//     }
-// }
-
-const getUserById = async(req,res)=>{
-    const foundUser = await userModel.findById(req.params.id)
-
-    res.json({
-        message:"User fetched...",
-        data:foundUser})
-}
-
-// const getUserById1 =async (req,res)=>{
-//     try{
-//         const foundUser = await userModel.findById(req.params.id)
-
-//     res.status(200).json({
-//         message:"User fetched...",
-//         data:foundUser})
-//     }
-//     catch{
-//         res.status(500).json({
-//             message:"error",
-//             data:err
-//         })  
-//     }
-// }
-
-const forgotPassword = async (req,res)=>{
-    const email=req.body.email;
-    const foundUser = await userModel.findOne({email:email});
-
-    if(foundUser){
-        const token = jwt.sign(foundUser.toObject(),secret);
-        console.log(token);
-        const url = `http://localhost:5173/resetpassword/${token}`;
-        const mailContent = `<html>
-                              <a href ="${url}">reset password</a>
-                              </html>`;
-        await mailUtil.sendingMail(foundUser.email,"reset password",mailContent);
-        res.json({
-            message:"Reset password link sent successfully"
-        })
-    }else{
-        res.json({
-            message:"User not found.."
+        const createdUser = await userModel.create({
+            ...rest,
+            email,
+            phone: phone.toString(), // Ensure phone is stored as a string
+            password: hashedPassword,
         });
-    }
 
-}
+        await mailUtil.sendingMail(createdUser.email, "Welcome to SurveySnap", "Welcome to SurveySnap family!");
+
+        res.status(201).json({
+            message: "User created",
+            data: createdUser,
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Error", data: err });
+    }
+};
+
+//---------------------------------------------------
+
+const deleteUser = async (req, res) => {
+    const deletedUser = await userModel.findByIdAndDelete(req.params.id);
+    res.json({
+        message: "User deleted successfully",
+        data: deletedUser,
+    });
+};
+
+//---------------------------------------------------
+
+const getUserById = async (req, res) => {
+    const foundUser = await userModel.findById(req.params.id).populate("roleId");
+    res.json({
+        message: "User fetched",
+        data: foundUser,
+    });
+};
+
+//---------------------------------------------------
+
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const foundUser = await userModel.findOne({ email });
+
+    if (foundUser) {
+        const token = jwt.sign({ id: foundUser._id }, secret, { expiresIn: "1h" });
+        const url = `http://localhost:5173/resetpassword/${token}`;
+        const mailContent = `<html><a href="${url}">Reset Password</a></html>`;
+
+        await mailUtil.sendingMail(foundUser.email, "Reset Password", mailContent);
+        res.json({ message: "Reset password link sent successfully" });
+    } else {
+        res.status(404).json({ message: "User not found" });
+    }
+};
+
+//---------------------------------------------------
 
 const resetpassword = async (req, res) => {
-    const token = req.body.token; //decode --> email | id
-    const newPassword = req.body.password;
-  
-    const userFromToken = jwt.verify(token, secret);
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(newPassword,salt);
-  
-    const updatedUser = await userModel.findByIdAndUpdate(userFromToken._id, {
-      password: hashedPassword,
-    });
-    res.json({
-      message: "password updated successfully..",
-    });
-  };
+    try {
+        const { token, password } = req.body;
+        const decoded = jwt.verify(token, secret);
+
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(password, salt);
+
+        await userModel.findByIdAndUpdate(decoded.id, { password: hashedPassword });
+
+        res.json({ message: "Password updated successfully" });
+    } catch (err) {
+        res.status(400).json({ message: "Invalid or expired token" });
+    }
+};
+
+const updateUser = async (req, res) => {
+  try {
+      const { id } = req.params;
+      let updateData = { ...req.body };
+
+      // Convert phone to string if present
+      if (updateData.phone) {
+          updateData.phone = updateData.phone.toString();
+      }
+
+      // Hash password if present
+      if (updateData.password) {
+          const salt = bcrypt.genSaltSync(10);
+          updateData.password = bcrypt.hashSync(updateData.password, salt);
+      }
+
+      const updatedUser = await userModel.findByIdAndUpdate(
+          id,
+          updateData,
+          { new: true, runValidators: true }
+      ).populate("roleId");
+
+      if (!updatedUser) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({
+          message: "User updated successfully",
+          data: updatedUser
+      });
+  } catch (err) {
+      res.status(400).json({ 
+          message: "Error updating user", 
+          error: err.message 
+      });
+  }
+};
 
 module.exports = {
-    getAllUsers,addUser,deleteUser,getUserById,signup,loginUser,forgotPassword,resetpassword
-    // getAllUsers1,addUser1,deleteUser1,getUserById1,
-
-}
+    getAllUsers,
+    deleteUser,
+    getUserById,
+    signup,
+    loginUser,
+    forgotPassword,
+    resetpassword,
+    loginuserWithToken,
+    updateUser
+};
