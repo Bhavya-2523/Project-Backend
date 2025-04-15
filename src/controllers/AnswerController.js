@@ -1,9 +1,27 @@
 const Answer = require("../models/AnswerModel");
 // const Response = require("../models/ResponseModel");
 
+const getAllAnswers = async (req, res) => {
+    try {
+                // const { surveyId } = req.params;
+        
+                const answers = await Answer.find()
+                    .populate("questionId", "questionText");
+        
+                if (!answers.length) {
+                    return res.status(404).json({ message: "No answers found for this survey" });
+                }
+        
+                res.status(200).json({total: answers.length, answers });
+            } catch (error) {
+                res.status(500).json({ message: "Server error", error: error.message });
+            }
+        };    
+  
+
 const submitAnswer = async (req, res) => {
     try {
-        const { responseId, questionId, answerText, selectedOption, ratingValue } = req.body;
+        const { surveyId, questionId, answerText, selectedOption, ratingValue } = req.body;
 
         // const response = await Response.findById(responseId);
         // if (!response) {
@@ -11,7 +29,7 @@ const submitAnswer = async (req, res) => {
         // }
 
         const newAnswer = new Answer({
-            responseId,
+            surveyId,
             questionId,
             answerText: answerText || null,
             selectedOption: selectedOption || null,
@@ -26,20 +44,6 @@ const submitAnswer = async (req, res) => {
     }
 };
 
-const getAnswersByResponse = async (req, res) => {
-    try {
-        const { responseId } = req.params;
-
-        const answers = await Answer.find({ responseId }).populate("questionId", "questionText");
-        if (!answers.length) {
-            return res.status(404).json({ message: "No answers found for this response" });
-        }
-
-        res.status(200).json({ answers });
-    } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
-    }
-};
 
 const deleteAnswer = async (req, res) => {
     try {
@@ -56,28 +60,46 @@ const deleteAnswer = async (req, res) => {
     }
 };
 
+// const getAnswersBySurvey = async (req, res) => {
+//     try {
+//         const { surveyId } = req.params;
+
+//         const answers = await Answer.find({ surveyId })
+//             .populate("questionId", "questionText");
+
+//         if (!answers.length) {
+//             return res.status(404).json({ message: "No answers found for this survey" });
+//         }
+
+//         res.status(200).json({total: answers.length, answers });
+//     } catch (error) {
+//         res.status(500).json({ message: "Server error", error: error.message });
+//     }
+// };
+
 const getAnswersBySurvey = async (req, res) => {
     try {
-        const { surveyId } = req.params;
-
-        const answers = await Answer.find({ surveyId })
-            .populate("questionId", "questionText");
-
-        if (!answers.length) {
-            return res.status(404).json({ message: "No answers found for this survey" });
-        }
-
-        res.status(200).json({ answers });
+      const surveyId  = req.params.id;
+        console.log(surveyId)
+      const answers = await Answer.find({ surveyId })
+        .populate("questionId", "questionText");
+  
+      if (!answers.length) {
+        return res.status(404).json({ message: "No answers found for this survey" });
+      }
+  
+      res.status(200).json({ total: answers.length, answers });
     } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
+      res.status(500).json({ message: "Server error", error: error.message });
     }
-};
+  };
+  
 
 
 
 module.exports = {
     submitAnswer,
-    getAnswersByResponse,
     deleteAnswer,
     getAnswersBySurvey,
+    getAllAnswers, 
 };

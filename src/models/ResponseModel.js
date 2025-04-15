@@ -9,12 +9,12 @@ const responseSchema = new Schema({
     },
     respondentId: {
         type: Schema.Types.ObjectId,
-        ref: "users", // Links response to a user (nullable for anonymous users)
+        ref: "users",
         default: null
     },
     submittedAt: {
         type: Date,
-        default: Date.now // Auto-sets the timestamp when submitted
+        default: Date.now
     },
     completionTime: {
         type: Number,

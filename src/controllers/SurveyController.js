@@ -15,12 +15,12 @@ const upload = multer({
   }).single("image");
 
 
-const getAllSurveys = async (req, res) => {8
+const getAllSurveys = async (req, res) => {
     try {
         const surveys = await surveyModel.find().populate("creatorId").populate("categoryId");
         res.json({
             message: "Surveys fetched successfully",
-            data: surveys
+            data: surveys.length,surveys
         });
     } catch (error) {
         res.status(500).json({ message: "Error fetching surveys", error: error.message });

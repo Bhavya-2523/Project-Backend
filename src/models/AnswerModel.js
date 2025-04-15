@@ -7,6 +7,11 @@ const answerSchema = new Schema({
     //     ref: "responses",
     //     // required: true
     // },
+    surveyId: {
+        type: Schema.Types.ObjectId,
+        ref: "surveys", // make sure this matches your Survey model name
+        required: true
+      },
     questionId: {
         type: Schema.Types.ObjectId,
         ref: "questions", 
