@@ -48,12 +48,29 @@ const loginuserWithToken = async (req, res) => {
 
 //---------------------------------------------------
 
+// const getAllUsers = async (req, res) => {
+//     try {
+//         const users = await userModel.find().populate("roleId");
+//         res.status(200).json({
+//             message: "Users fetched successfully",
+//             data: users.length,users
+//         });
+//     } catch (error) {
+//         console.error("Error fetching users:", error);
+//         res.status(500).json({
+//             message: "Failed to fetch users",
+//             error: error.message,
+//         });
+//     }
+// };
+
 const getAllUsers = async (req, res) => {
     try {
         const users = await userModel.find().populate("roleId");
         res.status(200).json({
             message: "Users fetched successfully",
-            data: users.length,users
+            count: users.length,
+            data: users
         });
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -63,6 +80,7 @@ const getAllUsers = async (req, res) => {
         });
     }
 };
+
 
 
 //---------------------------------------------------
