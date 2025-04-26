@@ -30,7 +30,7 @@ const answerRoutes = require("./src/routes/AnswerRoutes");
 app.use("/answer", answerRoutes);
 
 // MongoDB connection string directly
-const mongoURI = "mongodb+srv://patelbhavya2510:Bhavya@2523@25_node_internship.qj89xfy.mongodb.net/";  // Update this with your MongoDB URI if you use Atlas
+const mongoURI = "mongodb+srv://patelbhavya2510:Bhavya2523@25_node_internship.qj89xfy.mongodb.net/";  // Update this with your MongoDB URI if you use Atlas
 
 // Connect to MongoDB
 mongoose.connect(mongoURI, {
